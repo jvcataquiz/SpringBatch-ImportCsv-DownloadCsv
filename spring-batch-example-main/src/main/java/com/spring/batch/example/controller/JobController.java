@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -33,6 +30,11 @@ public class JobController {
     @Autowired
     @Qualifier("importCSVJob")
     private Job importCSVJob;
+
+    @Autowired
+    @Qualifier("downloadCSVJob")
+    private Job downloadCSVJob;
+
     @Value("${file.upload.dir}")
     private String uploadDir;
     private Path uploadPath;
@@ -55,6 +57,17 @@ public class JobController {
                 .addLong("startAt", System.currentTimeMillis()).toJobParameters();
         try {
             jobLauncher.run(importCSVJob, jobParameters);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @GetMapping("/downloadCSVJob")
+    public void downloadCSVJob() throws IOException {
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addLong("startAt", System.currentTimeMillis()).toJobParameters();
+        try {
+            jobLauncher.run(downloadCSVJob, jobParameters);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
             e.printStackTrace();
         }
